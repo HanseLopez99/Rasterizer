@@ -1,8 +1,8 @@
 from gl import Renderer, color
 import random
 
-width = 100
-height = 100
+width = 1024
+height = 512
 
 rend = Renderer(width, height)
 
