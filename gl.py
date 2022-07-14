@@ -27,7 +27,15 @@ class Renderer(object):
         self.clearColor = color(0, 0, 0)
         self.currentColor = color(1, 1, 1)
 
+        self.glViewport(0, 0, self.width, self.height)
+
         self.glClear()
+
+    def glViewport(self, posx, posy, width, height):
+        self.vpx = posx
+        self.vpy = posy
+        self.vpWidth = width
+        self.vpHeight = height
 
     def glClearColor(self, r, g, b):
         self.clearColor = color(r, g, b)
@@ -35,9 +43,22 @@ class Renderer(object):
     def glColor(self, r, g, b):
         self.currentColor = color(r, g, b)
 
-    def glPoint(self, x, y, clr=None):
+    def glClearViewport(self, clr=None):
+        for x in range(self.vpx, self.vpx + self.vpWidth):
+            for y in range(self.vpy, self.vpy + self.vpHeight):
+                self.glPoint(x, y, clr or self.clearColor)
+
+    def glPoint(self, x, y, clr=None):  # Window cordinates
         if (0 <= x < self.width) and (0 <= y < self.height):
             self.pixels[x][y] = clr or self.currentColor
+
+    def glPointvp(self, ndcx, ndcy, clr=None):  # NDC
+        x = (ndcx + 1) * (self.vpWidth / 2) + self.vpx
+        y = (ndcy + 1) * (self.vpHeight / 2) + self.vpy
+        x = int(x)
+        y = int(y)
+
+        self.glPoint(x, y, clr or self.currentColor)
 
     def glClear(self):
         self.pixels = [
