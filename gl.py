@@ -1,7 +1,14 @@
 import struct
 from collections import namedtuple
+import numpy as np
 
 V2 = namedtuple("Point2", ["x", "y"])
+V3 = namedtuple("Point2", ["x", "y", "z"])
+
+POINTS = 0
+LINES = 1
+TRIANGLES = 2
+QUADS = 3
 
 
 def char(c):
@@ -27,12 +34,35 @@ class Renderer(object):
     def __init__(self, width, height):
         self.width = width
         self.height = height
+
         self.clearColor = color(0, 0, 0)
-        self.currentColor = color(1, 1, 1)
+        self.glClear()
+
         # default color white
+        self.currentColor = color(1, 1, 1)
         self.color = color(1, 1, 1)
 
-        self.glClear()
+        self.vertexShader = None
+
+        self.primitiveType = TRIANGLES
+        self.vertexBuffer = []
+
+    def glAddVertices(self, vertices):
+        for vert in vertices:
+            self.vertexBuffer.append(vert)
+
+    def glPrimitiveAssembly(self, tVerts):
+        primitives = []
+
+        if self.primitiveType == TRIANGLES:
+            for i in range(0, len(tVerts), 3):
+                triangle = []
+                triangle.append(tVerts[i])
+                triangle.append(tVerts[i + 1])
+                triangle.append(tVerts[i + 2])
+                primitives.append(triangle)
+
+        return primitives
 
     def glClearColor(self, r, g, b):
         self.clearColor = color(r, g, b)
@@ -49,6 +79,32 @@ class Renderer(object):
             [self.clearColor for y in range(self.height)] for x in range(self.width)
         ]
 
+    def glTriangle(self, v0, v1, v2, clr=None):
+        self.glLine(v0, v1, clr or self.currentColor)
+        self.glLine(v1, v2, clr or self.currentColor)
+        self.glLine(v2, v0, clr or self.currentColor)
+
+    def glModelMatrix(self, translate=(0, 0, 0), scale=(1, 1, 1), rotate=(0, 0, 0)):
+        translation = np.matrix(
+            [
+                [1, 0, 0, translate[0]],
+                [0, 1, 0, translate[1]],
+                [0, 0, 1, translate[2]],
+                [0, 0, 0, 1],
+            ]
+        )
+
+        scaleMat = np.matrix(
+            [
+                [scale[0], 0, 0, 0],
+                [0, scale[1], 0, 0],
+                [0, 0, scale[2], 0],
+                [0, 0, 0, 1],
+            ]
+        )
+
+        self.modelMatrix = translation * scaleMat
+
     def glLine(self, v0, v1, clr=None):
         # Bresenham's line algorithm
         # y = mx + b
@@ -59,10 +115,10 @@ class Renderer(object):
         # for x in range(v0.x, v1.x + 1):
         #     self.glPoint(x, int(y), clr)
 
-        x0 = int(v0.x)
-        x1 = int(v1.x)
-        y0 = int(v0.y)
-        y1 = int(v1.y)
+        x0 = int(v0[0])
+        x1 = int(v1[0])
+        y0 = int(v0[1])
+        y1 = int(v1[1])
 
         # Si el punto 0 es igual al punto 1, solo dibujar un punto
         if x0 == x1 and y0 == y1:
@@ -113,6 +169,30 @@ class Renderer(object):
                     y -= 1
 
                 limit += 1
+
+    def glRender(self):
+        transformedVerts = []
+
+        for vert in self.vertexBuffer:
+            if self.vertexShader:
+                transformedVerts.append(
+                    self.vertexShader(vert, modelMatrix=self.modelMatrix)
+                )
+            else:
+                transformedVerts.append(vert)
+
+        primitives = self.glPrimitiveAssembly(transformedVerts)
+
+        primColor = None
+        if self.fragmentShader:
+            primColor = self.fragmentShader()
+            primColor = color(primColor[0], primColor[1], primColor[2])
+        else:
+            primColor = self.currentColor
+
+        for prim in primitives:
+            if self.primitiveType == TRIANGLES:
+                self.glTriangle(prim[0], prim[1], prim[2], primColor)
 
     def glFinish(self, fileName):
         with open(fileName, "wb") as file:
