@@ -1,6 +1,7 @@
 import struct
 from collections import namedtuple
 import numpy as np
+from obj import Obj
 
 V2 = namedtuple("Point2", ["x", "y"])
 V3 = namedtuple("Point2", ["x", "y", "z"])
@@ -30,6 +31,22 @@ def color(r, g, b):
     return bytes([int(b * 255), int(g * 255), int(r * 255)])
 
 
+class Model(object):
+    def __init__(
+        self, fileName, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)
+    ):
+        model = Obj(fileName)
+
+        self.vertices = model.vertices
+        self.texcoords = model.texcoords
+        self.normals = model.normals
+        self.faces = model.faces
+
+        self.translate = translate
+        self.rotate = rotate
+        self.scale = scale
+
+
 class Renderer(object):
     def __init__(self, width, height):
         self.width = width
@@ -41,6 +58,8 @@ class Renderer(object):
         # default color white
         self.currentColor = color(1, 1, 1)
         self.color = color(1, 1, 1)
+
+        self.objects = []
 
         self.vertexShader = None
 
@@ -84,7 +103,7 @@ class Renderer(object):
         self.glLine(v1, v2, clr or self.currentColor)
         self.glLine(v2, v0, clr or self.currentColor)
 
-    def glModelMatrix(self, translate=(0, 0, 0), scale=(1, 1, 1), rotate=(0, 0, 0)):
+    def glModelMatrix(self, translate=(0, 0, 0), scale=(1, 1, 1)):
         translation = np.matrix(
             [
                 [1, 0, 0, translate[0]],
@@ -103,7 +122,7 @@ class Renderer(object):
             ]
         )
 
-        self.modelMatrix = translation * scaleMat
+        return translation * scaleMat
 
     def glLine(self, v0, v1, clr=None):
         # Bresenham's line algorithm
@@ -170,8 +189,43 @@ class Renderer(object):
 
                 limit += 1
 
+    def glLoadModel(
+        self, fileName, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)
+    ):
+        self.objects.append(Model(fileName, translate, rotate, scale))
+
     def glRender(self):
         transformedVerts = []
+
+        for model in self.objects:
+            mMat = self.glModelMatrix(model.translate, model.scale)
+
+            for face in model.faces:
+                vertCount = len(face)
+
+                v0 = model.vertices[face[0][0] - 1]
+                v1 = model.vertices[face[1][0] - 1]
+                v2 = model.vertices[face[2][0] - 1]
+
+                if vertCount == 4:
+                    v3 = model.vertices[face[3][0] - 1]
+
+                if self.vertexShader:
+                    v0 = self.vertexShader(v0, modelMatrix=mMat)
+                    v1 = self.vertexShader(v1, modelMatrix=mMat)
+                    v2 = self.vertexShader(v2, modelMatrix=mMat)
+
+                    if vertCount == 4:
+                        v3 = self.vertexShader(v3, modelMatrix=mMat)
+
+                transformedVerts.append(v0)
+                transformedVerts.append(v1)
+                transformedVerts.append(v2)
+
+                if vertCount == 4:
+                    transformedVerts.append(v0)
+                    transformedVerts.append(v2)
+                    transformedVerts.append(v3)
 
         for vert in self.vertexBuffer:
             if self.vertexShader:
