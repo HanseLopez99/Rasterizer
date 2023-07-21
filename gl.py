@@ -189,6 +189,49 @@ class Renderer(object):
 
                 limit += 1
 
+    def glPolygon(self, vertices, clr=None):
+        for i in range(len(vertices)):
+            v0 = vertices[i]
+            v1 = vertices[(i + 1) % len(vertices)]
+
+            self.glLine(v0, v1, clr or self.currentColor)
+
+            # Fill polygon using glFillPolygon
+            self.glFillPolygon(vertices, clr or self.currentColor)
+
+    def glFillPolygon(self, polygon, clr=None):
+        # Scanline polygon fill algorithm
+
+        for y in range(self.height):
+            # Encontrar el valor minimo y maximo en y de los vertices
+            vertices = []
+            for i in range(len(polygon)):
+                v0 = polygon[i]
+                v1 = polygon[(i + 1) % len(polygon)]
+
+                if v0.y < y and v1.y >= y or v1.y < y and v0.y >= y:
+                    # Calcular la coordenada x de la interseccion
+                    x = (
+                        v0.x + (y - v0.y) / (v1.y - v0.y) * (v1.x - v0.x)
+                        if v0.y != v1.y
+                        else v0.x
+                    )
+
+                    # Si la
+
+                    # Agregar el punto a la lista de vertices
+                    vertices.append(V2(x, y))
+
+            # Ordenar los puntos de interseccion de menor a mayor
+            vertices = sorted(vertices, key=lambda v: v.x)
+
+            # Dibujar lineas entre cada par de puntos de interseccion
+            for i in range(0, len(vertices), 2):
+                v0 = vertices[i]
+                v1 = vertices[i + 1]
+
+                self.glLine(v0, v1, clr or self.currentColor)
+
     def glLoadModel(
         self, fileName, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)
     ):
