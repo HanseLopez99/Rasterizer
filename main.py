@@ -2,8 +2,8 @@ from gl import Renderer, V2, V3, color
 import shaders
 import random
 
-width = 1280
-height = 1280
+width = 1000
+height = 1000
 
 rend = Renderer(width, height)
 
@@ -17,5 +17,12 @@ rend.glLoadModel(
 )
 
 rend.glRender()
+
+# triangle = [(130, 50), (250, 500), (500, 10)]
+
+# triangle2 = [(10, 500), (100, 500), (60, 450)]
+
+# rend.glTriangle(triangle[0], triangle[1], triangle[2])
+# rend.glTriangle(triangle2[0], triangle2[1], triangle2[2])
 
 rend.glFinish("output.bmp")
