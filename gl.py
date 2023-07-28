@@ -2,6 +2,8 @@ import struct
 from collections import namedtuple
 import numpy as np
 from obj import Obj
+from math import pi, sin, cos
+from mathLib import barycentricCoords
 
 V2 = namedtuple("Point2", ["x", "y"])
 V3 = namedtuple("Point2", ["x", "y", "z"])
@@ -98,6 +100,10 @@ class Renderer(object):
             [self.clearColor for y in range(self.height)] for x in range(self.width)
         ]
 
+        self.zbuffer = [
+            [float("inf") for y in range(self.height)] for x in range(self.width)
+        ]
+
     def glTriangle(self, A, B, C, clr=None):
         if A[1] < B[1]:
             A, B = B, A
@@ -158,7 +164,36 @@ class Renderer(object):
 
             flatTop(B, D, C)
 
-    def glModelMatrix(self, translate=(0, 0, 0), scale=(1, 1, 1)):
+    def glTriangle_bc(self, A, B, C):
+        minX = round(min(A[0], B[0], C[0]))
+        maxX = round(max(A[0], B[0], C[0]))
+        minY = round(min(A[1], B[1], C[1]))
+        maxY = round(max(A[1], B[1], C[1]))
+
+        colorA = (1, 0, 0)
+        colorB = (0, 1, 0)
+        colorC = (0, 0, 1)
+
+        for x in range(minX, maxX + 1):
+            for y in range(minY, maxY + 1):
+                P = (x, y)
+                u, v, w = barycentricCoords(A, B, C, P)
+
+                if 0 <= u <= 1 and 0 <= v <= 1 and 0 <= w <= 1:
+                    z = u * A[2] + v * B[2] + w * C[2]
+
+                    if z < self.zbuffer[x][y]:
+                        self.zbuffer[x][y] = z
+
+                        colorP = color(
+                            u * colorA[0] + v * colorB[0] + w * colorC[0],
+                            u * colorA[1] + v * colorB[1] + w * colorC[1],
+                            u * colorA[2] + v * colorB[2] + w * colorC[2],
+                        )
+
+                        self.glPoint(x, y, colorP)
+
+    def glModelMatrix(self, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)):
         translation = np.matrix(
             [
                 [1, 0, 0, translate[0]],
@@ -167,6 +202,8 @@ class Renderer(object):
                 [0, 0, 0, 1],
             ]
         )
+
+        rolMat = self.glRotationMatrix(rotate[0], rotate[1], rotate[2])
 
         scaleMat = np.matrix(
             [
@@ -177,7 +214,41 @@ class Renderer(object):
             ]
         )
 
-        return translation * scaleMat
+        return translation * rolMat * scaleMat
+
+    def glRotationMatrix(self, pitch=0, yaw=0, roll=0):
+        pitch *= pi / 180
+        yaw *= pi / 180
+        roll *= pi / 180
+
+        pitchMat = np.matrix(
+            [
+                [1, 0, 0, 0],
+                [0, cos(pitch), -sin(pitch), 0],
+                [0, sin(pitch), cos(pitch), 0],
+                [0, 0, 0, 1],
+            ]
+        )
+
+        yawMat = np.matrix(
+            [
+                [cos(yaw), 0, sin(yaw), 0],
+                [0, 1, 0, 0],
+                [-sin(yaw), 0, cos(yaw), 0],
+                [0, 0, 0, 1],
+            ]
+        )
+
+        rollMat = np.matrix(
+            [
+                [cos(roll), -sin(roll), 0, 0],
+                [sin(roll), cos(roll), 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1],
+            ]
+        )
+
+        return pitchMat * yawMat * rollMat
 
     def glLine(self, v0, v1, clr=None):
         # Bresenham's line algorithm
@@ -253,7 +324,7 @@ class Renderer(object):
         transformedVerts = []
 
         for model in self.objects:
-            mMat = self.glModelMatrix(model.translate, model.scale)
+            mMat = self.glModelMatrix(model.translate, model.rotate, model.scale)
 
             for face in model.faces:
                 vertCount = len(face)
@@ -301,7 +372,7 @@ class Renderer(object):
 
         for prim in primitives:
             if self.primitiveType == TRIANGLES:
-                self.glTriangle(prim[0], prim[1], prim[2], primColor)
+                self.glTriangle_bc(prim[0], prim[1], prim[2])
 
     def glFinish(self, fileName):
         with open(fileName, "wb") as file:
