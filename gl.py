@@ -176,22 +176,24 @@ class Renderer(object):
 
         for x in range(minX, maxX + 1):
             for y in range(minY, maxY + 1):
-                P = (x, y)
-                u, v, w = barycentricCoords(A, B, C, P)
+                if (0 <= x < self.width) and (0 <= y < self.height):
+                    P = (x, y)
+                    bCoords = barycentricCoords(A, B, C, P)
 
-                if 0 <= u <= 1 and 0 <= v <= 1 and 0 <= w <= 1:
-                    z = u * A[2] + v * B[2] + w * C[2]
+                    if bCoords != None:
+                        u, v, w = bCoords
+                        z = u * A[2] + v * B[2] + w * C[2]
 
-                    if z < self.zbuffer[x][y]:
-                        self.zbuffer[x][y] = z
+                        if z < self.zbuffer[x][y]:
+                            self.zbuffer[x][y] = z
 
-                        colorP = color(
-                            u * colorA[0] + v * colorB[0] + w * colorC[0],
-                            u * colorA[1] + v * colorB[1] + w * colorC[1],
-                            u * colorA[2] + v * colorB[2] + w * colorC[2],
-                        )
+                            colorP = color(
+                                u * colorA[0] + v * colorB[0] + w * colorC[0],
+                                u * colorA[1] + v * colorB[1] + w * colorC[1],
+                                u * colorA[2] + v * colorB[2] + w * colorC[2],
+                            )
 
-                        self.glPoint(x, y, colorP)
+                            self.glPoint(x, y, colorP)
 
     def glModelMatrix(self, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)):
         translation = np.matrix(
