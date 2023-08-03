@@ -14,8 +14,8 @@ def barycentricCoords(A, B, C, P):
     )
 
     areaACP = abs(
-        (P[0] * C[1] + C[0] * A[1] + A[0] * P[1])
-        - (P[1] * C[0] + C[1] * A[0] + A[1] * P[0])
+        (A[0] * C[1] + C[0] * P[1] + P[0] * A[1])
+        - (A[1] * C[0] + C[1] * P[0] + P[1] * A[0])
     )
 
     areaABP = abs(

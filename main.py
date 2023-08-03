@@ -3,7 +3,7 @@ import shaders
 import random
 
 width = 1000
-height = 1000
+height = 500
 
 rend = Renderer(width, height)
 
@@ -11,10 +11,19 @@ rend.vertexShader = shaders.vertexShader
 rend.fragmentShader = shaders.fragmentShader
 
 rend.glLoadModel(
-    "ganesha.obj",
-    translate=((width / 2) + 75, height / 2, 0),
+    "model.obj",
+    "model.bmp",
+    translate=(250, 250, 0),
     rotate=(0, 180, 0),
-    scale=(20, 20, 20),
+    scale=(200, 200, 200),
+)
+
+rend.glLoadModel(
+    "model.obj",
+    "model.bmp",
+    translate=(750, 250, 0),
+    rotate=(0, 90, 0),
+    scale=(200, 200, 200),
 )
 
 rend.glRender()
