@@ -1,10 +1,10 @@
 import struct
 from collections import namedtuple
-import numpy as np
+import mathLib as ml
 from obj import Obj
 from math import pi, sin, cos
 from texture import Texture
-from mathLib import barycentricCoords
+
 
 V2 = namedtuple("Point2", ["x", "y"])
 V3 = namedtuple("Point2", ["x", "y", "z"])
@@ -191,7 +191,7 @@ class Renderer(object):
             for y in range(minY, maxY + 1):
                 if 0 <= x < self.width and 0 <= y < self.height:
                     P = (x, y)
-                    bCoords = barycentricCoords(A, B, C, P)
+                    bCoords = ml.barycentricCoords(A, B, C, P)
 
                     if bCoords != None:
                         u, v, w = bCoords
@@ -218,61 +218,51 @@ class Renderer(object):
                                 self.glPoint(x, y, colorP)
 
     def glModelMatrix(self, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)):
-        translation = np.matrix(
-            [
-                [1, 0, 0, translate[0]],
-                [0, 1, 0, translate[1]],
-                [0, 0, 1, translate[2]],
-                [0, 0, 0, 1],
-            ]
-        )
+        translation = [
+            [1, 0, 0, translate[0]],
+            [0, 1, 0, translate[1]],
+            [0, 0, 1, translate[2]],
+            [0, 0, 0, 1],
+        ]
 
         rolMat = self.glRotationMatrix(rotate[0], rotate[1], rotate[2])
 
-        scaleMat = np.matrix(
-            [
-                [scale[0], 0, 0, 0],
-                [0, scale[1], 0, 0],
-                [0, 0, scale[2], 0],
-                [0, 0, 0, 1],
-            ]
-        )
+        scaleMat = [
+            [scale[0], 0, 0, 0],
+            [0, scale[1], 0, 0],
+            [0, 0, scale[2], 0],
+            [0, 0, 0, 1],
+        ]
 
-        return translation * rolMat * scaleMat
+        return ml.multiplyMatrix4X4(ml.multiplyMatrix4X4(translation, rolMat), scaleMat)
 
     def glRotationMatrix(self, pitch=0, yaw=0, roll=0):
         pitch *= pi / 180
         yaw *= pi / 180
         roll *= pi / 180
 
-        pitchMat = np.matrix(
-            [
-                [1, 0, 0, 0],
-                [0, cos(pitch), -sin(pitch), 0],
-                [0, sin(pitch), cos(pitch), 0],
-                [0, 0, 0, 1],
-            ]
-        )
+        pitchMat = [
+            [1, 0, 0, 0],
+            [0, cos(pitch), -sin(pitch), 0],
+            [0, sin(pitch), cos(pitch), 0],
+            [0, 0, 0, 1],
+        ]
 
-        yawMat = np.matrix(
-            [
-                [cos(yaw), 0, sin(yaw), 0],
-                [0, 1, 0, 0],
-                [-sin(yaw), 0, cos(yaw), 0],
-                [0, 0, 0, 1],
-            ]
-        )
+        yawMat = [
+            [cos(yaw), 0, sin(yaw), 0],
+            [0, 1, 0, 0],
+            [-sin(yaw), 0, cos(yaw), 0],
+            [0, 0, 0, 1],
+        ]
 
-        rollMat = np.matrix(
-            [
-                [cos(roll), -sin(roll), 0, 0],
-                [sin(roll), cos(roll), 0, 0],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1],
-            ]
-        )
+        rollMat = [
+            [cos(roll), -sin(roll), 0, 0],
+            [sin(roll), cos(roll), 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+        ]
 
-        return pitchMat * yawMat * rollMat
+        return ml.multiplyMatrix4X4(ml.multiplyMatrix4X4(pitchMat, yawMat), rollMat)
 
     def glLine(self, v0, v1, clr=None):
         # Bresenham's line algorithm
