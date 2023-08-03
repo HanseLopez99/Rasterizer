@@ -3,7 +3,7 @@ import shaders
 import random
 
 width = 1000
-height = 500
+height = 600
 
 rend = Renderer(width, height)
 
@@ -11,19 +11,60 @@ rend.vertexShader = shaders.vertexShader
 rend.fragmentShader = shaders.fragmentShader
 
 rend.glLoadModel(
-    "model.obj",
-    "model.bmp",
-    translate=(250, 250, 0),
-    rotate=(0, 180, 0),
-    scale=(200, 200, 200),
+    "monkey.obj",
+    "monkey.bmp",
+    translate=(35, 120, 0),
+    rotate=(90, 90, 90),
+    scale=(5, 5, 5),
 )
 
 rend.glLoadModel(
-    "model.obj",
-    "model.bmp",
-    translate=(750, 250, 0),
-    rotate=(0, 90, 0),
-    scale=(200, 200, 200),
+    "monkey.obj",
+    "monkey.bmp",
+    translate=(150, 250, 0),
+    rotate=(90, 180, 90),
+    scale=(5, 5, 5),
+)
+
+rend.glLoadModel(
+    "monkey.obj",
+    "monkey.bmp",
+    translate=(850, 250, 0),
+    rotate=(90, 180, 270),
+    scale=(5, 5, 5),
+)
+
+rend.glLoadModel(
+    "monkey.obj",
+    "monkey.bmp",
+    translate=(500, 120, 0),
+    rotate=(180, 360, 360),
+    scale=(5, 5, 5),
+)
+
+
+rend.glLoadModel(
+    "monkey.obj",
+    "monkey.bmp",
+    translate=(630, 250, 0),
+    rotate=(90, 180, 0),
+    scale=(5, 5, 5),
+)
+
+rend.glLoadModel(
+    "monkey.obj",
+    "monkey.bmp",
+    translate=(370, 250, 0),
+    rotate=(90, 180, 180),
+    scale=(5, 5, 5),
+)
+
+rend.glLoadModel(
+    "monkey.obj",
+    "monkey.bmp",
+    translate=(960, 120, 0),
+    rotate=(270, 270, 90),
+    scale=(5, 5, 5),
 )
 
 rend.glRender()
