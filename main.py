@@ -10,8 +10,8 @@ rend = Renderer(width, height)
 rend.vertexShader = shaders.vertexShader
 rend.fragmentShader = shaders.fragmentShader
 
-rend.glCamMatrix(translate=(0, 2.5, -6))
-# rend.glLookAt(camPos=(0, -5, 0), eyePos=(0, -2.8, -10))
+# rend.glCamMatrix(translate=(0, 2.5, -6))
+rend.glLookAt(camPos=(0, -2, -5), eyePos=(0, 0.7, -10))
 
 rend.glLoadModel(
     fileName="models/monkey.obj",
@@ -24,4 +24,4 @@ rend.glLoadModel(
 
 rend.glRender()
 
-rend.glFinish("shots/medium.bmp")
+rend.glFinish("shots/low-angle.bmp")
