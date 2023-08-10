@@ -1,9 +1,12 @@
 def vertexShader(vertex, **kwargs):
     modelMatrix = kwargs["modelMatrix"]
+    viewMatrix = kwargs["viewMatrix"]
+    projectionMatrix = kwargs["projectionMatrix"]
+    vpMatrix = kwargs["vpMatrix"]
 
     vt = [vertex[0], vertex[1], vertex[2], 1]
 
-    vt = modelMatrix @ vt
+    vt = vpMatrix * projectionMatrix * viewMatrix * modelMatrix @ vt
 
     vt = [vt[0, 0], vt[0, 1], vt[0, 2], vt[0, 3]]
 
