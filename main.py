@@ -11,7 +11,7 @@ rend.vertexShader = shaders.vertexShader
 rend.fragmentShader = shaders.fragmentShader
 
 # rend.glCamMatrix(translate=(0, 2.5, -6))
-rend.glLookAt(camPos=(0, 7, -6.5), eyePos=(0, 0.7, -10))
+rend.glLookAt(camPos=(5, 7, -6.5), eyePos=(0, 0.7, -10))
 
 rend.glLoadModel(
     fileName="models/monkey.obj",
@@ -24,4 +24,4 @@ rend.glLoadModel(
 
 rend.glRender()
 
-rend.glFinish("shots/high-angle.bmp")
+rend.glFinish("shots/dutch-angle.bmp")
