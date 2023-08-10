@@ -1,3 +1,6 @@
+import mathLib as ml
+
+
 def vertexShader(vertex, **kwargs):
     modelMatrix = kwargs["modelMatrix"]
     viewMatrix = kwargs["viewMatrix"]
@@ -6,11 +9,20 @@ def vertexShader(vertex, **kwargs):
 
     vt = [vertex[0], vertex[1], vertex[2], 1]
 
-    vt = vpMatrix * projectionMatrix * viewMatrix * modelMatrix @ vt
+    # vt = vpMatrix * projectionMatrix * viewMatrix * modelMatrix @ vt
 
-    vt = [vt[0, 0], vt[0, 1], vt[0, 2], vt[0, 3]]
+    # Use multiplyMatrix4X4 instead and matmul4 istead of @
+    vt = ml.matmul4(
+        ml.multiplyMatrix4X4(
+            ml.multiplyMatrix4X4(
+                ml.multiplyMatrix4X4(vpMatrix, projectionMatrix), viewMatrix
+            ),
+            modelMatrix,
+        ),
+        vt,
+    )
 
-    vt = [vt[0] / vt[3], vt[1] / vt[3], vt[2] / vt[3]]
+    vt = [vt[0], vt[1], vt[2]]
 
     return vt
 
