@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def vertexShader(vertex, **kwargs):
     modelMatrix = kwargs["modelMatrix"]
     viewMatrix = kwargs["viewMatrix"]
@@ -24,3 +27,71 @@ def fragmentShader(**kwargs):
     else:
         color = (1, 1, 1)
     return color
+
+
+def flatShader(**kwargs):
+    texCoords = kwargs["texCoords"]
+    texture = kwargs["texture"]
+    dLight = kwargs["dLight"]
+    normal = kwargs["normals"]
+
+    b = 1.0
+    g = 1.0
+    r = 1.0
+
+    if texture != None:
+        textureColor = texture.getColor(texCoords[0], texCoords[1])
+        b *= textureColor[2]
+        g *= textureColor[1]
+        r *= textureColor[0]
+
+    dLight = np.array(dLight)
+    intensity = np.dot(normal, -dLight)
+
+    b *= intensity
+    g *= intensity
+    r *= intensity
+
+    if intensity > 0:
+        return r, g, b
+    else:
+        return [0, 0, 0]
+
+
+def gouradShader(**kwargs):
+    texture = kwargs["texture"]
+    tA, tB, tC = kwargs["texCoords"]
+    nA, nB, nC = kwargs["normals"]
+    dLight = kwargs["dLight"]
+    u, v, w = kwargs["bCoords"]
+
+    b = 1.0
+    g = 1.0
+    r = 1.0
+
+    if texture != None:
+        tU = u * tA[0] + v * tB[0] + w * tC[0]
+        tV = u * tA[1] + v * tB[1] + w * tC[1]
+
+        textureColor = texture.getColor(tU, tV)
+        b *= textureColor[2]
+        g *= textureColor[1]
+        r *= textureColor[0]
+
+    normal = [
+        u * nA[0] + v * nB[0] + w * nC[0],
+        u * nA[1] + v * nB[1] + w * nC[1],
+        u * nA[2] + v * nB[2] + w * nC[2],
+    ]
+
+    dLight = np.array(dLight)
+    intensity = np.dot(normal, -dLight)
+
+    b *= intensity
+    g *= intensity
+    r *= intensity
+
+    if intensity > 0:
+        return r, g, b
+    else:
+        return [0, 0, 0]
