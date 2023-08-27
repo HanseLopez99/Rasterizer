@@ -95,3 +95,156 @@ def gouradShader(**kwargs):
         return r, g, b
     else:
         return [0, 0, 0]
+
+
+def toonShader(**kwargs):
+    texture = kwargs["texture"]
+    tA, tB, tC = kwargs["texCoords"]
+    nA, nB, nC = kwargs["normals"]
+    dLight = kwargs["dLight"]
+    u, v, w = kwargs["bCoords"]
+
+    b = 1.0
+    g = 1.0
+    r = 1.0
+
+    if texture != None:
+        tU = u * tA[0] + v * tB[0] + w * tC[0]
+        tV = u * tA[1] + v * tB[1] + w * tC[1]
+
+        textureColor = texture.getColor(tU, tV)
+        b *= textureColor[2]
+        g *= textureColor[1]
+        r *= textureColor[0]
+
+    normal = [
+        u * nA[0] + v * nB[0] + w * nC[0],
+        u * nA[1] + v * nB[1] + w * nC[1],
+        u * nA[2] + v * nB[2] + w * nC[2],
+    ]
+
+    dLight = np.array(dLight)
+    intensity = np.dot(normal, -dLight)
+
+    if intensity <= 0.25:
+        intensity = 0.2
+    elif intensity <= 0.5:
+        intensity = 0.45
+    elif intensity <= 0.75:
+        intensity = 0.7
+    elif intensity <= 1:
+        intensity = 0.95
+
+    b *= intensity
+    g *= intensity
+    r *= intensity
+
+    if intensity > 0:
+        return r, g, b
+    else:
+        return [0, 0, 0]
+
+
+def redShader(**kwargs):
+    texture = kwargs["texture"]
+    tA, tB, tC = kwargs["texCoords"]
+    nA, nB, nC = kwargs["normals"]
+    dLight = kwargs["dLight"]
+    u, v, w = kwargs["bCoords"]
+
+    b = 1.0
+    g = 1.0
+    r = 1.0
+
+    if texture != None:
+        tU = u * tA[0] + v * tB[0] + w * tC[0]
+        tV = u * tA[1] + v * tB[1] + w * tC[1]
+
+        textureColor = texture.getColor(tU, tV)
+        b *= textureColor[2]
+        g *= textureColor[1]
+        r *= textureColor[0]
+
+    normal = [
+        u * nA[0] + v * nB[0] + w * nC[0],
+        u * nA[1] + v * nB[1] + w * nC[1],
+        u * nA[2] + v * nB[2] + w * nC[2],
+    ]
+
+    dLight = np.array(dLight)
+    intensity = np.dot(normal, -dLight)
+
+    b *= intensity
+    g *= intensity
+    r *= intensity
+
+    red = (1, 0, 0)
+
+    b *= red[2]
+    g *= red[1]
+    r *= red[0]
+
+    if intensity > 0:
+        return r, g, b
+    else:
+        return [0, 0, 0]
+
+
+def yellowGlowShader(**kwargs):
+    texture = kwargs["texture"]
+    tA, tB, tC = kwargs["texCoords"]
+    nA, nB, nC = kwargs["normals"]
+    dLight = kwargs["dLight"]
+    u, v, w = kwargs["bCoords"]
+    camMatrix = kwargs["camMatrix"]
+
+    b = 1.0
+    g = 1.0
+    r = 1.0
+
+    if texture != None:
+        tU = u * tA[0] + v * tB[0] + w * tC[0]
+        tV = u * tA[1] + v * tB[1] + w * tC[1]
+
+        textureColor = texture.getColor(tU, tV)
+        b *= textureColor[2]
+        g *= textureColor[1]
+        r *= textureColor[0]
+
+    normal = [
+        u * nA[0] + v * nB[0] + w * nC[0],
+        u * nA[1] + v * nB[1] + w * nC[1],
+        u * nA[2] + v * nB[2] + w * nC[2],
+    ]
+
+    dLight = np.array(dLight)
+    intensity = np.dot(normal, -dLight)
+
+    if intensity <= 0:
+        intensity = 0
+
+    b *= intensity
+    g *= intensity
+    r *= intensity
+
+    camForward = (camMatrix.item(0, 2), camMatrix.item(1, 2), camMatrix.item(2, 2))
+
+    glowAmount = 1 - np.dot(normal, camForward)
+
+    if glowAmount <= 0:
+        glowAmount = 0
+
+    yellow = (1, 1, 0)
+
+    b += glowAmount * yellow[2]
+    g += glowAmount * yellow[1]
+    r += glowAmount * yellow[0]
+
+    if b > 1:
+        b = 1
+    if g > 1:
+        g = 1
+    if r > 1:
+        r = 1
+
+    return r, g, b

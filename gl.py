@@ -50,8 +50,14 @@ class Model(object):
         self.rotate = rotate
         self.scale = scale
 
+        self.setShaders(None, None)
+
     def LoadTexture(self, filename):
         self.texture = Texture(filename)
+
+    def setShaders(self, vertexShader, fragmentShader):
+        self.vertexShader = vertexShader
+        self.fragmentShader = fragmentShader
 
 
 class Renderer(object):
@@ -225,6 +231,7 @@ class Renderer(object):
                                     normals=normals,
                                     dLight=self.directionalLight,
                                     bCoords=bCoords,
+                                    camMatrix=self.camMatrix,
                                 )
 
                                 self.glPoint(
@@ -414,17 +421,7 @@ class Renderer(object):
 
                 limit += 1
 
-    def glLoadModel(
-        self,
-        fileName,
-        textureName,
-        translate=(0, 0, 0),
-        rotate=(0, 0, 0),
-        scale=(1, 1, 1),
-    ):
-        model = Model(fileName, translate, rotate, scale)
-        model.LoadTexture(textureName)
-
+    def glAddModel(self, model):
         self.objects.append(model)
 
     def glRender(self):
@@ -433,7 +430,14 @@ class Renderer(object):
         normals = []
 
         for model in self.objects:
+            transformedVerts = []
+            textureCoords = []
+            normals = []
+
+            self.vertexShader = model.vertexShader
+            self.fragmentShader = model.fragmentShader
             self.activeTexture = model.texture
+
             mMat = self.glModelMatrix(model.translate, model.rotate, model.scale)
 
             for face in model.faces:
@@ -527,11 +531,13 @@ class Renderer(object):
                     normals.append(vn2)
                     normals.append(vn3)
 
-        primitives = self.glPrimitiveAssembly(transformedVerts, textureCoords, normals)
+            primitives = self.glPrimitiveAssembly(
+                transformedVerts, textureCoords, normals
+            )
 
-        for prim in primitives:
-            if self.primitiveType == TRIANGLES:
-                self.glTriangle_bc(prim[0], prim[1], prim[2])
+            for prim in primitives:
+                if self.primitiveType == TRIANGLES:
+                    self.glTriangle_bc(prim[0], prim[1], prim[2])
 
     def glFinish(self, fileName):
         with open(fileName, "wb") as file:
