@@ -288,3 +288,110 @@ def yellowGlowShader(**kwargs):
         r = 1
 
     return r, g, b
+
+
+def chessShader(**kwargs):
+    tA, tB, tC = kwargs["texCoords"]
+    u, v, w = kwargs["bCoords"]
+    size = 10  # Adjust for checker size
+
+    tU = u * tA[0] + v * tB[0] + w * tC[0]
+    tV = u * tA[1] + v * tB[1] + w * tC[1]
+
+    if (int(tU * size) % 2) ^ (int(tV * size) % 2):
+        return (1, 1, 1)  # white
+    else:
+        return (0, 0, 0)  # black
+
+
+def sketchedToonShader(**kwargs):
+    texture = kwargs["texture"]
+    tA, tB, tC = kwargs["texCoords"]
+    nA, nB, nC = kwargs["normals"]
+    dLight = kwargs["dLight"]
+    u, v, w = kwargs["bCoords"]
+
+    b = 1.0
+    g = 1.0
+    r = 1.0
+
+    if texture != None:
+        tU = u * tA[0] + v * tB[0] + w * tC[0]
+        tV = u * tA[1] + v * tB[1] + w * tC[1]
+        textureColor = texture.getColor(tU, tV)
+        b *= textureColor[2]
+        g *= textureColor[1]
+        r *= textureColor[0]
+
+    normal = [
+        u * nA[0] + v * nB[0] + w * nC[0],
+        u * nA[1] + v * nB[1] + w * nC[1],
+        u * nA[2] + v * nB[2] + w * nC[2],
+    ]
+
+    dLight = np.array(dLight)
+    intensity = np.dot(normal, -dLight)
+
+    if intensity < 0.2:
+        return [0, 0, 0]  # Dark color for the outlines
+
+    # Toon shading bands
+    if intensity < 0.5:
+        intensity = 0.4
+    elif intensity < 0.8:
+        intensity = 0.7
+    else:
+        intensity = 1.0
+
+    b *= intensity
+    g *= intensity
+    r *= intensity
+
+    # Adding a little noise for the "sketched" effect.
+    noiseAmount = 0.05 * np.random.randn()
+    r += noiseAmount
+    g += noiseAmount
+    b += noiseAmount
+
+    return r, g, b
+
+
+def thermalVisionShader(**kwargs):
+    texture = kwargs["texture"]
+    tA, tB, tC = kwargs["texCoords"]
+    nA, nB, nC = kwargs["normals"]
+    dLight = kwargs["dLight"]
+    u, v, w = kwargs["bCoords"]
+
+    if texture != None:
+        tU = u * tA[0] + v * tB[0] + w * tC[0]
+        tV = u * tA[1] + v * tB[1] + w * tC[1]
+        textureColor = texture.getColor(tU, tV)
+    else:
+        textureColor = [1, 1, 1]
+
+    normal = [
+        u * nA[0] + v * nB[0] + w * nC[0],
+        u * nA[1] + v * nB[1] + w * nC[1],
+        u * nA[2] + v * nB[2] + w * nC[2],
+    ]
+
+    dLight = np.array(dLight)
+    intensity = np.dot(normal, -dLight)
+
+    # Convert the intensity to a thermal color based on a gradient.
+    if intensity < 0.25:
+        color = [0, 0, 0.5 + intensity]  # Dark blue to light blue
+    elif intensity < 0.5:
+        color = [0, 4 * intensity - 1, 1]  # Blue to green
+    elif intensity < 0.75:
+        color = [4 * intensity - 2, 1 - (4 * intensity - 2), 0]  # Green to yellow
+    else:
+        color = [1, 4 * intensity - 3, 0]  # Yellow to red
+
+    # Modulate with the texture color if present
+    color[0] *= textureColor[0]
+    color[1] *= textureColor[1]
+    color[2] *= textureColor[2]
+
+    return color

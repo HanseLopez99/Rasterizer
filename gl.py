@@ -32,7 +32,26 @@ def dword(d):
 
 
 def color(r, g, b):
-    return bytes([int(b * 255), int(g * 255), int(r * 255)])
+    b = int(b * 255)
+    g = int(g * 255)
+    r = int(r * 255)
+
+    if r > 255:
+        r = 255
+    elif r < 0:
+        r = 0
+
+    if g > 255:
+        g = 255
+    elif g < 0:
+        g = 0
+
+    if b > 255:
+        b = 255
+    elif b < 0:
+        b = 0
+
+    return bytes([b, g, r])
 
 
 class Model(object):
