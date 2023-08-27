@@ -459,6 +459,20 @@ class Renderer(object):
                 #     triangleNormal1 = triangleNormal1 / np.linalg.norm(triangleNormal1)
                 #     normals.append(triangleNormal1)
 
+                vt0 = model.texcoords[face[0][1] - 1]
+                vt1 = model.texcoords[face[1][1] - 1]
+                vt2 = model.texcoords[face[2][1] - 1]
+
+                if vertCount == 4:
+                    vt3 = model.texcoords[face[3][1] - 1]
+
+                vn0 = model.normals[face[0][2] - 1]
+                vn1 = model.normals[face[1][2] - 1]
+                vn2 = model.normals[face[2][2] - 1]
+
+                if vertCount == 4:
+                    vn3 = model.normals[face[3][2] - 1]
+
                 if self.vertexShader:
                     v0 = self.vertexShader(
                         v0,
@@ -466,6 +480,7 @@ class Renderer(object):
                         viewMatrix=self.viewMatrix,
                         projectionMatrix=self.projectionMatrix,
                         vpMatrix=self.vpMatrix,
+                        normal=vn0,
                     )
                     v1 = self.vertexShader(
                         v1,
@@ -473,6 +488,7 @@ class Renderer(object):
                         viewMatrix=self.viewMatrix,
                         projectionMatrix=self.projectionMatrix,
                         vpMatrix=self.vpMatrix,
+                        normal=vn1,
                     )
                     v2 = self.vertexShader(
                         v2,
@@ -480,6 +496,7 @@ class Renderer(object):
                         viewMatrix=self.viewMatrix,
                         projectionMatrix=self.projectionMatrix,
                         vpMatrix=self.vpMatrix,
+                        normal=vn2,
                     )
 
                     if vertCount == 4:
@@ -489,6 +506,7 @@ class Renderer(object):
                             viewMatrix=self.viewMatrix,
                             projectionMatrix=self.projectionMatrix,
                             vpMatrix=self.vpMatrix,
+                            normal=vn3,
                         )
 
                 transformedVerts.append(v0)

@@ -11,7 +11,32 @@ def vertexShader(vertex, **kwargs):
 
     vt = vpMatrix * projectionMatrix * viewMatrix * modelMatrix @ vt
 
-    vt = [vt[0, 0], vt[0, 1], vt[0, 2], vt[0, 3]]
+    vt = vt.tolist()[0]
+
+    vt = [vt[0] / vt[3], vt[1] / vt[3], vt[2] / vt[3]]
+
+    return vt
+
+
+def fatVertexShader(vertex, **kwargs):
+    modelMatrix = kwargs["modelMatrix"]
+    viewMatrix = kwargs["viewMatrix"]
+    projectionMatrix = kwargs["projectionMatrix"]
+    vpMatrix = kwargs["vpMatrix"]
+    normal = kwargs["normal"]
+
+    blowAmount = 0.2
+
+    vt = [
+        vertex[0] + (normal[0] * blowAmount),
+        vertex[1] + (normal[1] * blowAmount),
+        vertex[2] + (normal[2] * blowAmount),
+        1,
+    ]
+
+    vt = vpMatrix * projectionMatrix * viewMatrix * modelMatrix @ vt
+
+    vt = vt.tolist()[0]
 
     vt = [vt[0] / vt[3], vt[1] / vt[3], vt[2] / vt[3]]
 
@@ -19,14 +44,23 @@ def vertexShader(vertex, **kwargs):
 
 
 def fragmentShader(**kwargs):
-    texCoords = kwargs["texCoords"]
+    tA, tB, tC = kwargs["texCoords"]
     texture = kwargs["texture"]
+    u, v, w = kwargs["bCoords"]
+
+    b = 1.0
+    g = 1.0
+    r = 1.0
 
     if texture != None:
-        color = texture.getColor(texCoords[0], texCoords[1])
-    else:
-        color = (1, 1, 1)
-    return color
+        tU = u * tA[0] + v * tB[0] + w * tC[0]
+        tV = u * tA[1] + v * tB[1] + w * tC[1]
+
+        textureColor = texture.getColor(tU, tV)
+        b *= textureColor[2]
+        g *= textureColor[1]
+        r *= textureColor[0]
+    return r, g, b
 
 
 def flatShader(**kwargs):
