@@ -87,6 +87,8 @@ class Renderer(object):
         self.clearColor = color(0, 0, 0)
         self.glClear()
 
+        self.background = None
+
         # default color white
         self.currentColor = color(1, 1, 1)
         self.color = color(1, 1, 1)
@@ -107,6 +109,24 @@ class Renderer(object):
         self.glProjectionMatrix()
 
         self.directionalLight = (1, 0, 0)
+
+    def glBackgroundTexture(self, filename):
+        self.background = Texture(filename)
+
+    def glClearBackground(self):
+        self.glClear()
+
+        if self.background:
+            # Para cada pixel del viewport
+            for x in range(self.vpX, self.vpX + self.vpWidth + 1):
+                for y in range(self.vpY, self.vpY + self.vpHeight + 1):
+                    u = (x - self.vpX) / self.vpWidth
+                    v = (y - self.vpY) / self.vpHeight
+
+                    texColor = self.background.getColor(u, v)
+
+                    if texColor:
+                        self.glPoint(x, y, color(texColor[0], texColor[1], texColor[2]))
 
     def glAddVertices(self, vertices):
         for vert in vertices:

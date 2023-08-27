@@ -7,8 +7,9 @@ height = 600
 
 rend = Renderer(width, height)
 
-rend.glClearColor(0.5, 0.5, 0.5)
-rend.glClear()
+rend.glClearColor(0.2, 0.2, 0.2)
+rend.glBackgroundTexture("backgrounds/bosque.bmp")
+rend.glClearBackground()
 
 rend.vertexShader = shaders.vertexShader
 # rend.fragmentShader = shaders.fragmentShader
