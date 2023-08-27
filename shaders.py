@@ -98,6 +98,7 @@ def gouradShader(**kwargs):
     nA, nB, nC = kwargs["normals"]
     dLight = kwargs["dLight"]
     u, v, w = kwargs["bCoords"]
+    modelMatrix = kwargs["modelMatrix"]
 
     b = 1.0
     g = 1.0
@@ -116,7 +117,12 @@ def gouradShader(**kwargs):
         u * nA[0] + v * nB[0] + w * nC[0],
         u * nA[1] + v * nB[1] + w * nC[1],
         u * nA[2] + v * nB[2] + w * nC[2],
+        0,
     ]
+
+    normal = modelMatrix @ normal
+    normal = normal.tolist()[0]
+    normal = [normal[0], normal[1], normal[2]]
 
     dLight = np.array(dLight)
     intensity = np.dot(normal, -dLight)

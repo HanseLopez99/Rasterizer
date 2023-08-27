@@ -20,26 +20,19 @@ rend.fragmentShader = shaders.yellowGlowShader
 # rend.glLookAt(camPos=(-3, -1, 0), eyePos=(0, 0, -5))
 
 model1 = Model(
-    "models/model.obj", translate=(-3, 0, -5), rotate=(0, 0, 0), scale=(1.5, 1.5, 1.5)
+    "models/model.obj", translate=(-2, 0, -5), rotate=(0, 0, 0), scale=(1.5, 1.5, 1.5)
 )
 model1.LoadTexture("textures/model.bmp")
-model1.setShaders(shaders.vertexShader, shaders.fragmentShader)
+model1.setShaders(shaders.vertexShader, shaders.gouradShader)
 
 model2 = Model(
-    "models/model.obj", translate=(0, 0, -5), rotate=(0, 0, 0), scale=(1.5, 1.5, 1.5)
+    "models/model.obj", translate=(2, 0, -5), rotate=(0, 90, 0), scale=(1.5, 1.5, 1.5)
 )
 model2.LoadTexture("textures/model.bmp")
-model2.setShaders(shaders.fatVertexShader, shaders.fragmentShader)
-
-model3 = Model(
-    "models/model.obj", translate=(3, 0, -5), rotate=(0, 0, 0), scale=(1.5, 1.5, 1.5)
-)
-model3.LoadTexture("textures/model.bmp")
-model3.setShaders(shaders.fatVertexShader, shaders.gouradShader)
+model2.setShaders(shaders.vertexShader, shaders.gouradShader)
 
 rend.glAddModel(model1)
 rend.glAddModel(model2)
-rend.glAddModel(model3)
 
 rend.glRender()
 

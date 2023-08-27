@@ -81,6 +81,8 @@ class Renderer(object):
 
         self.activeTexture = None
 
+        self.activeModelMatrix = None
+
         self.glViewport(0, 0, self.width, self.height)
         self.glCamMatrix()
         self.glProjectionMatrix()
@@ -232,6 +234,7 @@ class Renderer(object):
                                     dLight=self.directionalLight,
                                     bCoords=bCoords,
                                     camMatrix=self.camMatrix,
+                                    modelMatrix=self.activeModelMatrix,
                                 )
 
                                 self.glPoint(
@@ -438,7 +441,9 @@ class Renderer(object):
             self.fragmentShader = model.fragmentShader
             self.activeTexture = model.texture
 
-            mMat = self.glModelMatrix(model.translate, model.rotate, model.scale)
+            self.activeModelMatrix = self.glModelMatrix(
+                model.translate, model.rotate, model.scale
+            )
 
             for face in model.faces:
                 vertCount = len(face)
@@ -476,7 +481,7 @@ class Renderer(object):
                 if self.vertexShader:
                     v0 = self.vertexShader(
                         v0,
-                        modelMatrix=mMat,
+                        modelMatrix=self.activeModelMatrix,
                         viewMatrix=self.viewMatrix,
                         projectionMatrix=self.projectionMatrix,
                         vpMatrix=self.vpMatrix,
@@ -484,7 +489,7 @@ class Renderer(object):
                     )
                     v1 = self.vertexShader(
                         v1,
-                        modelMatrix=mMat,
+                        modelMatrix=self.activeModelMatrix,
                         viewMatrix=self.viewMatrix,
                         projectionMatrix=self.projectionMatrix,
                         vpMatrix=self.vpMatrix,
@@ -492,7 +497,7 @@ class Renderer(object):
                     )
                     v2 = self.vertexShader(
                         v2,
-                        modelMatrix=mMat,
+                        modelMatrix=self.activeModelMatrix,
                         viewMatrix=self.viewMatrix,
                         projectionMatrix=self.projectionMatrix,
                         vpMatrix=self.vpMatrix,
@@ -502,7 +507,7 @@ class Renderer(object):
                     if vertCount == 4:
                         v3 = self.vertexShader(
                             v3,
-                            modelMatrix=mMat,
+                            modelMatrix=self.activeModelMatrix,
                             viewMatrix=self.viewMatrix,
                             projectionMatrix=self.projectionMatrix,
                             vpMatrix=self.vpMatrix,
