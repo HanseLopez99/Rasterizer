@@ -268,115 +268,99 @@ class Renderer(object):
         self.vpWidth = width
         self.vpHeight = height
 
-        self.vpMatrix = np.matrix(
-            [
-                [self.vpWidth / 2, 0, 0, self.vpX + self.vpWidth / 2],
-                [0, self.vpHeight / 2, 0, self.vpY + self.vpHeight / 2],
-                [0, 0, 0.5, 0.5],
-                [0, 0, 0, 1],
-            ]
-        )
+        self.vpMatrix = [
+            [self.vpWidth / 2, 0, 0, self.vpX + self.vpWidth / 2],
+            [0, self.vpHeight / 2, 0, self.vpY + self.vpHeight / 2],
+            [0, 0, 0.5, 0.5],
+            [0, 0, 0, 1],
+        ]
 
     def glCamMatrix(self, translate=(0, 0, 0), rotate=(0, 0, 0)):
         # Crea una matriz de camara
         self.camMatrix = self.glModelMatrix(translate, rotate)
 
         # La matriz de vista es igual a la inversa de la matriz de camara
-        self.viewMatrix = np.linalg.inv(self.camMatrix)
+        self.viewMatrix = ml.inverseMatrix(self.camMatrix)
 
     def glLookAt(self, camPos=(0, 0, 0), eyePos=(0, 0, 0)):
         worldUp = (0, 1, 0)
 
-        forward = np.subtract(camPos, eyePos)
-        forward = forward / np.linalg.norm(forward)
+        forward = ml.subtract(camPos, eyePos)
+        forward = forward / ml.norm(forward)
 
-        right = np.cross(worldUp, forward)
-        right = right / np.linalg.norm(right)
+        right = ml.cross(worldUp, forward)
+        right = right / ml.norm(right)
 
-        up = np.cross(forward, right)
-        up = up / np.linalg.norm(up)
+        up = ml.cross(forward, right)
+        up = up / ml.norm(up)
 
-        self.camMatrix = np.matrix(
-            [
-                [right[0], up[0], forward[0], camPos[0]],
-                [right[1], up[1], forward[1], camPos[1]],
-                [right[2], up[2], forward[2], camPos[2]],
-                [0, 0, 0, 1],
-            ]
-        )
+        self.camMatrix = [
+            [right[0], up[0], forward[0], camPos[0]],
+            [right[1], up[1], forward[1], camPos[1]],
+            [right[2], up[2], forward[2], camPos[2]],
+            [0, 0, 0, 1],
+        ]
 
-        self.viewMatrix = np.linalg.inv(self.camMatrix)
+        self.viewMatrix = ml.inverseMatrix(self.camMatrix)
 
     def glProjectionMatrix(self, fov=60, n=0.1, f=1000):
         aspectRatio = self.vpWidth / self.vpHeight
 
         t = tan((fov * pi / 180) / 2) * n
         r = t * aspectRatio
-        self.projectionMatrix = np.matrix(
-            [
-                [n / r, 0, 0, 0],
-                [0, n / t, 0, 0],
-                [0, 0, -(f + n) / (f - n), -2 * f * n / (f - n)],
-                [0, 0, -1, 0],
-            ]
-        )
+        self.projectionMatrix = [
+            [n / r, 0, 0, 0],
+            [0, n / t, 0, 0],
+            [0, 0, -(f + n) / (f - n), -2 * f * n / (f - n)],
+            [0, 0, -1, 0],
+        ]
 
     def glModelMatrix(self, translate=(0, 0, 0), rotate=(0, 0, 0), scale=(1, 1, 1)):
-        translation = np.matrix(
-            [
-                [1, 0, 0, translate[0]],
-                [0, 1, 0, translate[1]],
-                [0, 0, 1, translate[2]],
-                [0, 0, 0, 1],
-            ]
-        )
+        translation = [
+            [1, 0, 0, translate[0]],
+            [0, 1, 0, translate[1]],
+            [0, 0, 1, translate[2]],
+            [0, 0, 0, 1],
+        ]
 
         rolMat = self.glRotationMatrix(rotate[0], rotate[1], rotate[2])
 
-        scaleMat = np.matrix(
-            [
-                [scale[0], 0, 0, 0],
-                [0, scale[1], 0, 0],
-                [0, 0, scale[2], 0],
-                [0, 0, 0, 1],
-            ]
-        )
+        scaleMat = [
+            [scale[0], 0, 0, 0],
+            [0, scale[1], 0, 0],
+            [0, 0, scale[2], 0],
+            [0, 0, 0, 1],
+        ]
 
-        return translation * rolMat * scaleMat
+        return ml.multiplyMatrix4X4(ml.multiplyMatrix4X4(translation, rolMat), scaleMat)
 
     def glRotationMatrix(self, pitch=0, yaw=0, roll=0):
         pitch *= pi / 180
         yaw *= pi / 180
         roll *= pi / 180
 
-        pitchMat = np.matrix(
-            [
-                [1, 0, 0, 0],
-                [0, cos(pitch), -sin(pitch), 0],
-                [0, sin(pitch), cos(pitch), 0],
-                [0, 0, 0, 1],
-            ]
-        )
+        pitchMat = [
+            [1, 0, 0, 0],
+            [0, cos(pitch), -sin(pitch), 0],
+            [0, sin(pitch), cos(pitch), 0],
+            [0, 0, 0, 1],
+        ]
 
-        yawMat = np.matrix(
-            [
-                [cos(yaw), 0, sin(yaw), 0],
-                [0, 1, 0, 0],
-                [-sin(yaw), 0, cos(yaw), 0],
-                [0, 0, 0, 1],
-            ]
-        )
+        yawMat = [
+            [cos(yaw), 0, sin(yaw), 0],
+            [0, 1, 0, 0],
+            [-sin(yaw), 0, cos(yaw), 0],
+            [0, 0, 0, 1],
+        ]
 
-        rollMat = np.matrix(
-            [
-                [cos(roll), -sin(roll), 0, 0],
-                [sin(roll), cos(roll), 0, 0],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1],
-            ]
-        )
+        rollMat = [
+            [cos(roll), -sin(roll), 0, 0],
+            [sin(roll), cos(roll), 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+        ]
 
-        return pitchMat * yawMat * rollMat
+        return ml.multiplyMatrix4X4(ml.multiplyMatrix4X4(pitchMat, yawMat), rollMat)
 
     def glLine(self, v0, v1, clr=None):
         # Bresenham's line algorithm

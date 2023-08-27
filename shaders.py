@@ -1,4 +1,5 @@
 import numpy as np
+import mathLib as ml
 
 
 def vertexShader(vertex, **kwargs):
@@ -9,13 +10,20 @@ def vertexShader(vertex, **kwargs):
 
     vt = [vertex[0], vertex[1], vertex[2], 1]
 
-    vt = vpMatrix * projectionMatrix * viewMatrix * modelMatrix @ vt
+    # vt = vpMatrix * projectionMatrix * viewMatrix * modelMatrix @ vt
+    # Replace above line with the mathLib functions
+    vt = ml.matmul4(
+        ml.multiplyMatrix4X4(
+            ml.multiplyMatrix4X4(vpMatrix, projectionMatrix),
+            ml.multiplyMatrix4X4(viewMatrix, modelMatrix),
+        ),
+        vt,
+    )
 
     vt = vt.tolist()[0]
 
-    vt = [vt[0] / vt[3], vt[1] / vt[3], vt[2] / vt[3]]
+    return vt[:3]
 
-    return vt
 
 
 def fatVertexShader(vertex, **kwargs):
@@ -79,8 +87,7 @@ def flatShader(**kwargs):
         g *= textureColor[1]
         r *= textureColor[0]
 
-    dLight = np.array(dLight)
-    intensity = np.dot(normal, -dLight)
+    intensity = ml.dot(normal, -dLight)
 
     b *= intensity
     g *= intensity
