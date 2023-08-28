@@ -1,4 +1,5 @@
 import numpy as np
+import mathLib as ml
 
 
 def vertexShader(vertex, **kwargs):
@@ -79,8 +80,7 @@ def flatShader(**kwargs):
         g *= textureColor[1]
         r *= textureColor[0]
 
-    dLight = np.array(dLight)
-    intensity = np.dot(normal, -dLight)
+    intensity = ml.dot(normal, -dLight)
 
     b *= intensity
     g *= intensity
@@ -124,8 +124,7 @@ def gouradShader(**kwargs):
     normal = normal.tolist()[0]
     normal = [normal[0], normal[1], normal[2]]
 
-    dLight = np.array(dLight)
-    intensity = np.dot(normal, -dLight)
+    intensity = ml.dot(normal, -dLight)
 
     b *= intensity
     g *= intensity
@@ -163,8 +162,7 @@ def toonShader(**kwargs):
         u * nA[2] + v * nB[2] + w * nC[2],
     ]
 
-    dLight = np.array(dLight)
-    intensity = np.dot(normal, -dLight)
+    intensity = ml.dot(normal, -dLight)
 
     if intensity <= 0.25:
         intensity = 0.2
@@ -211,8 +209,7 @@ def redShader(**kwargs):
         u * nA[2] + v * nB[2] + w * nC[2],
     ]
 
-    dLight = np.array(dLight)
-    intensity = np.dot(normal, -dLight)
+    intensity = ml.dot(normal, -dLight)
 
     b *= intensity
     g *= intensity
@@ -257,8 +254,7 @@ def yellowGlowShader(**kwargs):
         u * nA[2] + v * nB[2] + w * nC[2],
     ]
 
-    dLight = np.array(dLight)
-    intensity = np.dot(normal, -dLight)
+    intensity = ml.dot(normal, -dLight)
 
     if intensity <= 0:
         intensity = 0
@@ -269,7 +265,7 @@ def yellowGlowShader(**kwargs):
 
     camForward = (camMatrix.item(0, 2), camMatrix.item(1, 2), camMatrix.item(2, 2))
 
-    glowAmount = 1 - np.dot(normal, camForward)
+    glowAmount = 1 - ml.dot(normal, camForward)
 
     if glowAmount <= 0:
         glowAmount = 0
@@ -329,8 +325,7 @@ def sketchedToonShader(**kwargs):
         u * nA[2] + v * nB[2] + w * nC[2],
     ]
 
-    dLight = np.array(dLight)
-    intensity = np.dot(normal, -dLight)
+    intensity = ml.dot(normal, -dLight)
 
     if intensity < 0.2:
         return [0, 0, 0]  # Dark color for the outlines
@@ -376,8 +371,7 @@ def thermalVisionShader(**kwargs):
         u * nA[2] + v * nB[2] + w * nC[2],
     ]
 
-    dLight = np.array(dLight)
-    intensity = np.dot(normal, -dLight)
+    intensity = ml.dot(normal, -dLight)
 
     # Convert the intensity to a thermal color based on a gradient.
     if intensity < 0.25:
@@ -417,8 +411,7 @@ def hologramShader(**kwargs):
         u * nA[2] + v * nB[2] + w * nC[2],
     ]
 
-    dLight = np.array(dLight)
-    intensity = np.dot(normal, -dLight)
+    intensity = ml.dot(normal, -dLight)
 
     # Generate hologram color. Making the color a blend of cyan and purple.
     hologramColor = [0.8 + 0.2 * np.sin(tU * 10), 0.8 + 0.2 * np.sin(tV * 10), 1]
