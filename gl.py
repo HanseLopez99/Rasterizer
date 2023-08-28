@@ -108,7 +108,7 @@ class Renderer(object):
         self.glCamMatrix()
         self.glProjectionMatrix()
 
-        self.directionalLight = (1, 0, 0)
+        self.directionalLight = (0, 1, 0)
 
     def glBackgroundTexture(self, filename):
         self.background = Texture(filename)

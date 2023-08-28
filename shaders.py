@@ -395,3 +395,87 @@ def thermalVisionShader(**kwargs):
     color[2] *= textureColor[2]
 
     return color
+
+
+def hologramShader(**kwargs):
+    texture = kwargs["texture"]
+    tA, tB, tC = kwargs["texCoords"]
+    nA, nB, nC = kwargs["normals"]
+    dLight = kwargs["dLight"]
+    u, v, w = kwargs["bCoords"]
+
+    if texture != None:
+        tU = u * tA[0] + v * tB[0] + w * tC[0]
+        tV = u * tA[1] + v * tB[1] + w * tC[1]
+        textureColor = texture.getColor(tU, tV)
+    else:
+        textureColor = [1, 1, 1]
+
+    normal = [
+        u * nA[0] + v * nB[0] + w * nC[0],
+        u * nA[1] + v * nB[1] + w * nC[1],
+        u * nA[2] + v * nB[2] + w * nC[2],
+    ]
+
+    dLight = np.array(dLight)
+    intensity = np.dot(normal, -dLight)
+
+    # Generate hologram color. Making the color a blend of cyan and purple.
+    hologramColor = [0.8 + 0.2 * np.sin(tU * 10), 0.8 + 0.2 * np.sin(tV * 10), 1]
+
+    # Modulate intensity and the shimmering effect.
+    shimmerEffect = 0.5 + 0.5 * np.sin(tU * 20 + tV * 20)
+    color = [
+        shimmerEffect * hologramColor[0] * intensity * textureColor[0],
+        shimmerEffect * hologramColor[1] * intensity * textureColor[1],
+        shimmerEffect * hologramColor[2] * intensity * textureColor[2],
+    ]
+
+    return color
+
+
+def invertColorShader(**kwargs):
+    texture = kwargs["texture"]
+    tA, tB, tC = kwargs["texCoords"]
+    u, v, w = kwargs["bCoords"]
+
+    b, g, r = 1.0, 1.0, 1.0
+
+    if texture:
+        tU = u * tA[0] + v * tB[0] + w * tC[0]
+        tV = u * tA[1] + v * tB[1] + w * tC[1]
+
+        textureColor = texture.getColor(tU, tV)
+
+        # Invert each color component
+        b = 1.0 - textureColor[2]
+        g = 1.0 - textureColor[1]
+        r = 1.0 - textureColor[0]
+
+    return r, g, b
+
+
+def infraredShader(**kwargs):
+    texture = kwargs["texture"]
+    tA, tB, tC = kwargs["texCoords"]
+    u, v, w = kwargs["bCoords"]
+
+    b, g, r = 1.0, 1.0, 1.0
+
+    if texture:
+        tU = u * tA[0] + v * tB[0] + w * tC[0]
+        tV = u * tA[1] + v * tB[1] + w * tC[1]
+
+        textureColor = texture.getColor(tU, tV)
+
+        warmth = (textureColor[0] * 0.6) + (textureColor[1] * 0.4)
+        coolness = textureColor[2] * 0.8
+
+        infrared_intensity = warmth - coolness
+
+        # Ensure the values are within [0,1]
+        infrared_intensity = min(1.0, max(0.0, infrared_intensity))
+
+        r, g, b = infrared_intensity, infrared_intensity, infrared_intensity
+
+    return r, g, b
