@@ -283,10 +283,10 @@ class Renderer(object):
                                 self.glPoint(x, y, colorP)
 
     def glViewport(self, x, y, width, height):
-        self.vpX = x
-        self.vpY = y
-        self.vpWidth = width
-        self.vpHeight = height
+        self.vpX = int(x)
+        self.vpY = int(y)
+        self.vpWidth = int(width)
+        self.vpHeight = int(height)
 
         self.vpMatrix = np.matrix(
             [

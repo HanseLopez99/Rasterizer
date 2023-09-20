@@ -2,8 +2,8 @@ from gl import Renderer, Model
 import shaders
 import random
 
-width = 1000
-height = 600
+width = 3840
+height = 2160
 
 rend = Renderer(width, height)
 
@@ -25,7 +25,7 @@ monkey = Model(
     scale=(0.12, 0.12, 0.12),
 )
 monkey.LoadTexture("textures/monkey.bmp")
-monkey.setShaders(shaders.vertexShader, shaders.thermalVisionShader)
+monkey.setShaders(shaders.vertexShader, shaders.fragmentShader)
 
 stone = Model(
     "models/stone.obj",
@@ -34,7 +34,7 @@ stone = Model(
     scale=(0.4, 0.4, 0.4),
 )
 stone.LoadTexture("textures/stone.bmp")
-stone.setShaders(shaders.vertexShader, shaders.infraredShader)
+stone.setShaders(shaders.vertexShader, shaders.fragmentShader)
 
 human = Model(
     "models/human.obj",
@@ -43,7 +43,7 @@ human = Model(
     scale=(0.025, 0.025, 0.025),
 )
 human.LoadTexture("textures/human.bmp")
-human.setShaders(shaders.vertexShader, shaders.invertColorShader)
+human.setShaders(shaders.vertexShader, shaders.fragmentShader)
 
 thunderphone = Model(
     "models/thunderphone.obj",
@@ -52,7 +52,7 @@ thunderphone = Model(
     scale=(0.03, 0.03, 0.027),
 )
 thunderphone.LoadTexture("textures/thunderphone.bmp")
-thunderphone.setShaders(shaders.vertexShader, shaders.hologramShader)
+thunderphone.setShaders(shaders.vertexShader, shaders.fragmentShader)
 
 thunderphone2 = Model(
     "models/thunderphone.obj",
@@ -61,7 +61,7 @@ thunderphone2 = Model(
     scale=(0.03, 0.03, 0.027),
 )
 thunderphone2.LoadTexture("textures/thunderphone.bmp")
-thunderphone2.setShaders(shaders.vertexShader, shaders.hologramShader)
+thunderphone2.setShaders(shaders.vertexShader, shaders.fragmentShader)
 
 table = Model(
     "models/table.obj",
@@ -70,8 +70,7 @@ table = Model(
     scale=(1.6, 1.6, 1.6),
 )
 table.LoadTexture("textures/table.bmp")
-table.setShaders(shaders.vertexShader, shaders.chessShader)
-
+table.setShaders(shaders.vertexShader, shaders.fragmentShader)
 
 rend.glAddModel(monkey)
 rend.glAddModel(stone)
@@ -82,4 +81,4 @@ rend.glAddModel(table)
 
 rend.glRender()
 
-rend.glFinish("outputWithShaders.bmp")
+rend.glFinish("gouradOutput.bmp")
